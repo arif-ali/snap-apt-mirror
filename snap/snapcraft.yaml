@@ -1,15 +1,31 @@
-name: my-snap-name # you probably want to 'snapcraft register <name>'
-version: '0.1' # just for humans, typically '1.2+git' or '1.3.2'
-summary: Single-line elevator pitch for your amazing snap # 79 char long summary
+name: apt-mirror
+version: 0.5.4
+summary: A tool to mirror apt repos
 description: |
-  This is my-snap's description. You have a paragraph or two to tell the
-  most important story about your snap. Keep it under 100 words though,
-  we live in tweetspace and your description wants to look good in the snap
-  store.
+    A small tool that provides ability to mirror any parts (or
+    even all) of Debian and Ubuntu GNU/Linux distributions or any other
+    apt sources which typically provided by open source developers.
 
-confinement: devmode # use 'strict' once you have the right plugs and slots
+base: core22
+grade: stable
+confinement: strict
+
+environment:
+  PERL5LIB: ${SNAP}/usr/share/perl/5.34.0:${PERL5LIB}
+  LANG: C
 
 parts:
-  my-part:
-    # See 'snapcraft plugins'
-    plugin: nil
+  apt-mirror:
+    plugin: make
+    source: https://github.com/apt-mirror/apt-mirror.git
+    source-tag: "0.5.4"
+    override-stage:
+      snapcraftctl stage
+      cp etc/mirror.list ${SNAP_DATA}/mirror.list
+    stage-packages:
+      - perl-modules
+      - wget
+
+apps:
+  apt-mirror:
+    command: usr/local/bin/apt-mirror /var/snap/apt-mirror/common/mirror.list
